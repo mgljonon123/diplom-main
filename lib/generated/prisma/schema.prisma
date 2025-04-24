@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  email           String           @unique
+  password        String?
+  image           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  assessments     Assessment[]
+  recommendations Recommendation[]
+  userSkills      UserSkill[]
+}
+
+model Skill {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String        @unique
+  description  String?
+  category     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userSkills   UserSkill[]
+  careerSkills CareerSkill[]
+}
+
+model Career {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  title        String        @unique
+  description  String
+  salaryRange  String?
+  education    String?
+  experience   String?
+  industry     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  careerSkills CareerSkill[]
+}
+
+model Assessment {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String           @db.ObjectId
+  user            User             @relation(fields: [userId], references: [id])
+  answers         Json // Stores assessment answers
+  completedAt     DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  recommendations Recommendation[]
+}
+
+model Recommendation {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String     @db.ObjectId
+  user         User       @relation(fields: [userId], references: [id])
+  assessmentId String     @db.ObjectId
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  careers      Json // Array of recommended careers with details
+  analysis     String // AI analysis of the assessment
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model UserSkill {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+  skillId     String   @db.ObjectId
+  skill       Skill    @relation(fields: [skillId], references: [id])
+  proficiency Int      @default(1) // 1-5 scale
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, skillId])
+}
+
+model CareerSkill {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  careerId   String   @db.ObjectId
+  career     Career   @relation(fields: [careerId], references: [id])
+  skillId    String   @db.ObjectId
+  skill      Skill    @relation(fields: [skillId], references: [id])
+  importance Int      @default(1) // 1-5 scale
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([careerId, skillId])
+}

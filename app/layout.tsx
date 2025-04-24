@@ -1,10 +1,14 @@
 // /app/layout.tsx
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { Providers } from './providers';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'OpenRouter Chatbot',
-  description: 'A chatbot powered by OpenRouter and GPT-4.1',
+  title: 'Career Recommendation System',
+  description: 'Find your perfect career path with AI-powered recommendations',
 };
 
 export default function RootLayout({
@@ -14,7 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={inter.className}>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }
